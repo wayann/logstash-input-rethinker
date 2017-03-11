@@ -8,7 +8,7 @@ This is a plugin for [Logstash](https://github.com/elasticsearch/logstash).
 
 You'll need to use this with the Logstash 1.5 or higher, which you can [download here](https://www.elastic.co/downloads/logstash).
 
-- Install the plugin from the Logstash home directory
+- Install the plugin from the Logstash home directory (you will need jruby to bundle install)
 ```sh
 $ git clone https://github.com/wayann/logstash-input-rethinker
 $ cd logstash-input-rethinker
@@ -20,16 +20,7 @@ $ bin/plugin install --no-verify logstash-input-rethinker-0.1.0.gem
 - Now you can test the plugin using the stdout output:
 
 ```sh
-$ bin/logstash -e '
-input {rethinker
-   {host => "localhost"
-    port => 28015
-    auth_key => ""
-    watch_dbs => ["db1", "db2"]
-    watch_tables => ["test.foo", "db2.baz"]
-    backfill => true
-    }}
-output {stdout {codec => json_lines}}'
+$ bin/logstash -f rethinker.conf
 ```
 
 This will immediately watch the tables `test.foo` and `db2.baz`, and it will also watch the databases `db1` and `db2` for new or dropped tables and watch or unwatch those tables appropriately. Since `backfill` is `true`, it will automatically send events for the documents that already exist in those tables during initialization.

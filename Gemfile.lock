@@ -2,11 +2,11 @@ PATH
   remote: .
   specs:
     logstash-input-rethinker (0.1.0)
-      eventmachine (~> 1.0.9.1)
+      eventmachine
       logstash-codec-plain
-      logstash-core-plugin-api (~> 2.0)
-      rethinkdb (>= 2.3.0)
-      stud (>= 0.0.22)
+      logstash-core-plugin-api
+      rethinkdb
+      stud
 
 GEM
   remote: https://rubygems.org/
@@ -17,7 +17,7 @@ GEM
     coderay (1.1.1)
     concurrent-ruby (1.0.0-java)
     diff-lcs (1.3)
-    eventmachine (1.0.9.1-java)
+    eventmachine (1.2.3-java)
     ffi (1.9.18-java)
     filesize (0.0.4)
     fivemat (1.3.2)
@@ -124,7 +124,7 @@ PLATFORMS
 
 DEPENDENCIES
   eventmachine
-  logstash-devutils (>= 0.0.16)
+  logstash-devutils
   logstash-input-rethinker!
   rethinkdb
 

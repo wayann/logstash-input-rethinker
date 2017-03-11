@@ -1,19 +1,15 @@
-# encoding: utf-8
 require "logstash/inputs/base"
 require "logstash/namespace"  
 require "eventmachine"
 require "rethinkdb"
-
-# Generate a repeating message.
-#
-# This plugin is intented only as an example.
+require "stud/interval"
+require "socket" 
 
 class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   config_name "rethinker"
 
   # If undefined, Logstash will complain, even if codec is unused.
   default :codec, "json_lines"
-  attr_accessor :logger
 
   include RethinkDB::Shortcuts
 
@@ -26,10 +22,10 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   # Time period to squash changefeeds on. Defaults to no squashing.
   config :squash, :default => true
   # Which tables to watch for changes
-  config :watch_tables, :validate => :array, :default => ["dolly.customers", "dolly.orders"]
+  config :watch_tables, :validate => :array, :default => ["test.foo", "test.bar"]
   # Which databases to watch for changes. Tables added or removed from
   # these databases will be watched or unwatched accordingly
-  config :watch_dbs, :validate => :array, :default => ["dolly"]
+  config :watch_dbs, :validate => :array, :default => ["test"]
   # Whether to backfill documents from the dbs and tables when
   # (re)connecting to RethinkDB. This ensures all documents in the
   # RethinkDB tables will be sent over logstash, but it may cause a
@@ -39,12 +35,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   config :ca_certs, :default => nil
   # Credentials as of RethinkDB v2.3.x
   config :user, :validate => :string, :default => "admin"
-
-
-  # Set how frequently messages should be sent.
-  #
-  # The default, `1`, means send a message every second.
-  # config :interval, :validate => :number, :default => 1
+  config :password, :validate => :string, :default => ""
 
   public
   def register
@@ -71,7 +62,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
       :ssl => ssl
     )
     EM.run do
-      @logger.log "Eventmachine loop started"
+      @logger.info "Eventmachine loop started"
       @watch_dbs.uniq.each do |db|
         create_db_feed(db, DBHandler.new(db, self))
       end
@@ -108,7 +99,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
     # Add a table feed to the registry
     unless @table_feeds.has_key?(db) &&
            @table_feeds[db].has_key?(table)
-      @logger.log("Watching table #{db}.#{table}")
+      @logger.info("Watching table #{db}.#{table}")
       @table_feeds[db][table] = qhandle
     else
       qhandle.close
@@ -122,7 +113,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
        # If a duplicate feed comes in for the same table and needs to
        # be unregistered, we need to check if the handle is the same
        (qhandle.nil? || @table_feeds[db][table].equal?(qhandle))
-      @logger.log("Unregistering table #{db}.#{table}")
+      @logger.info("Unregistering table #{db}.#{table}")
       @table_feeds[db].delete(table).close
     end
   end
@@ -132,7 +123,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
     # are listed in it.
     unless @db_feeds.has_key? db
       @db_feeds[db] = qhandle
-      @logger.log "Feed for db '#{db}' registered"
+      @logger.info "Feed for db '#{db}' registered"
     end
   end
 
@@ -140,7 +131,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
     # Remove a db from the registry, close all of its feeds, and
     # remove its entry in @db_admin_tables
     if @table_feeds.has_key?(db)
-      @logger.log("Unregistering feed for db '#{db}'")
+      @logger.info("Unregistering feed for db '#{db}'")
       @table_feeds[db].keys.each do |table|
         unregister_table(db, table, nil)
       end
