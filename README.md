@@ -21,7 +21,7 @@ $ bin/plugin install --no-verify logstash-input-rethinker-0.1.0.gem
 
 ```sh
 $ bin/logstash -e '
-input {rethinkdb
+input {rethinker
    {host => "localhost"
     port => 28015
     auth_key => ""
