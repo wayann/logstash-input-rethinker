@@ -1,86 +1,59 @@
-# Logstash Plugin
+# Rethinker Logstash input plugin
 
-This is a plugin for [Logstash](https://github.com/elastic/logstash).
+This is a plugin for [Logstash](https://github.com/elasticsearch/logstash).
 
-It is fully free and fully open source. The license is Apache 2.0, meaning you are pretty much free to use it however you want in whatever way.
+**Currently this is BETA software. It contains some known limitations (see below)**
 
-## Documentation
+## Using the plugin
 
-Logstash provides infrastructure to automatically generate documentation for this plugin. We use the asciidoc format to write documentation so any comments in the source code will be first converted into asciidoc and then into html. All plugin documentation are placed under one [central location](http://www.elastic.co/guide/en/logstash/current/).
+You'll need to use this with the Logstash 1.5 or higher, which you can [download here](https://www.elastic.co/downloads/logstash).
 
-- For formatting code or config example, you can use the asciidoc `[source,ruby]` directive
-- For more asciidoc formatting tips, see the excellent reference here https://github.com/elastic/docs#asciidoc-guide
-
-## Need Help?
-
-Need help? Try #logstash on freenode IRC or the https://discuss.elastic.co/c/logstash discussion forum.
-
-## Developing
-
-### 1. Plugin Developement and Testing
-
-#### Code
-- To get started, you'll need JRuby with the Bundler gem installed.
-
-- Create a new plugin or clone and existing from the GitHub [logstash-plugins](https://github.com/logstash-plugins) organization. We also provide [example plugins](https://github.com/logstash-plugins?query=example).
-
-- Install dependencies
+- Install the plugin from the Logstash home directory
 ```sh
-bundle install
+$ git clone https://github.com/wayann/logstash-input-rethinker
+$ cd logstash-input-rethinker
+$ bundle install
+$ gem build logstash-input-rethinker.gemspec
+$ bin/plugin install --no-verify logstash-input-rethinker-0.1.0.gem
 ```
 
-#### Test
-
-- Update your dependencies
+- Now you can test the plugin using the stdout output:
 
 ```sh
-bundle install
+$ bin/logstash -e '
+input {rethinkdb
+   {host => "localhost"
+    port => 28015
+    auth_key => ""
+    watch_dbs => ["db1", "db2"]
+    watch_tables => ["test.foo", "db2.baz"]
+    backfill => true
+    }}
+output {stdout {codec => json_lines}}'
 ```
 
-- Run tests
+This will immediately watch the tables `test.foo` and `db2.baz`, and it will also watch the databases `db1` and `db2` for new or dropped tables and watch or unwatch those tables appropriately. Since `backfill` is `true`, it will automatically send events for the documents that already exist in those tables during initialization.
 
-```sh
-bundle exec rspec
-```
+### Format of the events:
 
-### 2. Running your unpublished Plugin in Logstash
+The events are encoded with the "json_lines" codec, which puts compressed json documents one event per line
 
-#### 2.1 Run in a local Logstash clone
+Fields:
 
-- Edit Logstash `Gemfile` and add the local plugin path, for example:
-```ruby
-gem "logstash-filter-awesome", :path => "/your/local/logstash-filter-awesome"
-```
-- Install plugin
-```sh
-bin/logstash-plugin install --no-verify
-```
-- Run Logstash with your plugin
-```sh
-bin/logstash -e 'filter {awesome {}}'
-```
-At this point any modifications to the plugin code will be applied to this local Logstash setup. After modifying the plugin, simply rerun Logstash.
+- **db**: the database that emitted the event
+- **table**: the table that emitted the event
+- **old_val**: the old value of the document (see [changefeeds](http://rethinkdb.com/docs/changefeeds/ruby/))
+- **new_val**: the new value of the document
+- **@timestamp**: timestamp added by logstash (so may not correspond to the rethinkdb server time the change was emitted)
+- **@version**: version number added by logstash (always 1)
 
-#### 2.2 Run in an installed Logstash
+## Known limitations
 
-You can use the same **2.1** method to run your plugin in an installed Logstash by editing its `Gemfile` and pointing the `:path` to your local plugin development directory or you can build the gem and install it using:
+There are two limitations that should be known by anyone using this in production systems:
 
-- Build your plugin gem
-```sh
-gem build logstash-filter-awesome.gemspec
-```
-- Install the plugin from the Logstash home
-```sh
-bin/logstash-plugin install /your/local/plugin/logstash-filter-awesome.gem
-```
-- Start Logstash and proceed to test the plugin
+1. Until RethinkDB supports [resuming changefeeds](https://github.com/rethinkdb/rethinkdb/issues/3471), this plugin cannot guarantee that no changes are missed if a connection to the database is dropped. Again, once that functionality is implemented, this plugin will be modified to provide reliable "at least once" semantics for changes (meaning once it reconnects, it can catch back up and send any changes that it missed).
+2. Documents that are deleted in RethinkDB while the LogStash plugin is disconnected will not be synchronized. This is true even if `backfill` is enabled. This limitation is a consequence of LogStash operating on a document-by-document basis.
 
-## Contributing
+## License
 
-All contributions are welcome: ideas, patches, documentation, bug reports, complaints, and even something you drew up on a napkin.
-
-Programming is not a required skill. Whatever you've seen about open source and maintainers or community members  saying "send patches or die" - you will not see that here.
-
-It is more important to the community that you are able to contribute.
-
-For more information about contributing, see the [CONTRIBUTING](https://github.com/elastic/logstash/blob/master/CONTRIBUTING.md) file.
+Apache 2.0
