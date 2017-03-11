@@ -1,8 +1,6 @@
 # encoding: utf-8
 require "logstash/inputs/base"
-require "logstash/namespace"
-require "stud/interval"
-require "socket" # for Socket.gethostname
+require "logstash/namespace"  
 require "eventmachine"
 require "rethinkdb"
 
@@ -40,7 +38,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   #ssl support
   config :ca_certs, :default => nil
   # Credentials as of RethinkDB v2.3.x
-  config :user, :validate => :string, :default => "admin"
+  # config :user, :validate => :string, :default => "admin"
 
 
   # Set how frequently messages should be sent.
@@ -204,7 +202,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
 end # class LogStash::Inputs::Rethinker
 
 # This handles feeds listening for changes to documents in a table
-class TableHandler < Rethinker::Handler
+class TableHandler < RethinkDB::Handler
   attr_accessor :db
   attr_accessor :table
   def initialize(db, table, plugin)
@@ -241,7 +239,7 @@ class TableHandler < Rethinker::Handler
 end
 
 # Handler for changes to the tables in a database
-class DBHandler < Rethinker::Handler
+class DBHandler < RethinkDB::Handler
 
   attr_accessor :db
 

@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-input-rethinker'
   s.version       = '0.1.0'
-  s.licenses      = ['Apache License (2.0)']
+  s.licenses      = ['Apache-2.0']
   s.summary       = 'RethinkDB updated logstash plugin'
   s.description   = 'Copy paste of old RethinkDB plugin to new logstash format'
-  s.homepage      = 'https://github.com/wayann'
+  s.homepage      = 'https://github.com/wayann/logstash-input-rethinker'
   s.authors       = ['Wayann']
   s.email         = 'wayann@nrg.re'
   s.require_paths = ['lib']
@@ -21,5 +21,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "logstash-core-plugin-api", "~> 2.0"
   s.add_runtime_dependency 'logstash-codec-plain'
   s.add_runtime_dependency 'stud', '>= 0.0.22'
+  s.add_runtime_dependency 'rethinkdb', '>=2.3.0'
+  s.add_runtime_dependency 'eventmachine', '~>1.0.9.1'
   s.add_development_dependency 'logstash-devutils', '>= 0.0.16'
 end
