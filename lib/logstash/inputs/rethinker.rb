@@ -26,10 +26,10 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   # Time period to squash changefeeds on. Defaults to no squashing.
   config :squash, :default => true
   # Which tables to watch for changes
-  config :watch_tables, :validate => :array, :default => []
+  config :watch_tables, :validate => :array, :default => ["dolly.customers", "dolly.orders"]
   # Which databases to watch for changes. Tables added or removed from
   # these databases will be watched or unwatched accordingly
-  config :watch_dbs, :validate => :array, :default => []
+  config :watch_dbs, :validate => :array, :default => ["dolly"]
   # Whether to backfill documents from the dbs and tables when
   # (re)connecting to RethinkDB. This ensures all documents in the
   # RethinkDB tables will be sent over logstash, but it may cause a
@@ -38,7 +38,7 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
   #ssl support
   config :ca_certs, :default => nil
   # Credentials as of RethinkDB v2.3.x
-  # config :user, :validate => :string, :default => "admin"
+  config :user, :validate => :string, :default => "admin"
 
 
   # Set how frequently messages should be sent.
