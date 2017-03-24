@@ -8,19 +8,11 @@ This is a plugin for [Logstash](https://github.com/elasticsearch/logstash).
 
 You'll need to use this with the Logstash 5.2.x or higher, which you can [download here](https://www.elastic.co/downloads/logstash).
 
-**update
+- Update
+
 I pushed this repo to rubygems.org, now you should be able to install directly like this:
 ```sh
 $ bin/plugin install logstash-input-rethinker
-```
-
-- Install the plugin from the Logstash home directory (you will need jruby to bundle install)
-```sh
-$ git clone https://github.com/wayann/logstash-input-rethinker
-$ cd logstash-input-rethinker
-$ bundle install
-$ gem build logstash-input-rethinker.gemspec
-$ bin/plugin install --no-verify logstash-input-rethinker-0.1.0.gem
 ```
 
 - Now you can test the plugin using the stdout output:
@@ -30,6 +22,15 @@ $ bin/logstash -f rethinker.conf
 ```
 
 This will immediately watch the tables `test.foo` and `db2.baz`, and it will also watch the databases `db1` and `db2` for new or dropped tables and watch or unwatch those tables appropriately. Since `backfill` is `true`, it will automatically send events for the documents that already exist in those tables during initialization.
+
+If you want to tweak it, install the plugin from the Logstash home directory (you will need jruby to bundle install)
+```sh
+$ git clone https://github.com/wayann/logstash-input-rethinker
+$ cd logstash-input-rethinker
+$ bundle install
+$ gem build logstash-input-rethinker.gemspec
+$ bin/plugin install --no-verify logstash-input-rethinker-0.1.0.gem
+```
 
 ### Format of the events:
 
