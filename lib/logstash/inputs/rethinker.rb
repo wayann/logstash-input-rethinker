@@ -59,6 +59,8 @@ class LogStash::Inputs::Rethinker < LogStash::Inputs::Base
       :host => @host,
       :port => @port,
       :auth_key => @auth_key,
+      :user => @user,
+      :password => @password,
       :ssl => ssl
     )
     EM.run do
