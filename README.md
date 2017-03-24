@@ -6,7 +6,13 @@ This is a plugin for [Logstash](https://github.com/elasticsearch/logstash).
 
 ## Using the plugin
 
-You'll need to use this with the Logstash 1.5 or higher, which you can [download here](https://www.elastic.co/downloads/logstash).
+You'll need to use this with the Logstash 5.2.x or higher, which you can [download here](https://www.elastic.co/downloads/logstash).
+
+**update
+I pushed this repo to rubygems.org, now you should be able to install directly like this:
+```sh
+$ bin/plugin install logstash-input-rethinker
+```
 
 - Install the plugin from the Logstash home directory (you will need jruby to bundle install)
 ```sh
